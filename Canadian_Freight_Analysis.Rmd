@@ -1,0 +1,1203 @@
+---
+title: "Canadian Freight Analysis DATA 603 Project"
+author: "Arshdeep Kaur (30238903), Hritvik Gaind (30248059),  \nMaharsh Khamar (30250183),
+  Prabhnoor Virk (30263405), \nSatyam Kapoor (30255909)\n"
+date: '*Group 3*'
+output: pdf_document
+---
+
+```{r setup, include=FALSE, message=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+We are group 3 from Lecture 1 (MORNING BATCH).
+
+# 1. INTRODUCTION 
+
+Freight transportation (movement of goods) is the unseen engine that keeps Canada running. Every day, goods like fresh seafood from Nova Scotia, heavy equipment from Alberta, or wheat from Saskatchewan travel thousands of kilometers across the country. These shipments connect farms, factories, and businesses to the people and places that need them. Without an efficient freight system, many of the things we rely on wouldn’t make it to our stores, homes, or workplaces on time.
+
+Canada is a big country with a lot of challenges—long distances, harsh weather, and busy trade routes. Moving goods efficiently isn’t easy, and every delay or wrong turn can lead to higher costs for businesses and consumers. That’s why it’s so important to understand how freight transportation works.
+
+By analyzing the Canadian Freight Analysis Framework (CFAF) dataset, we can uncover patterns and trends that provide insights into the movement of goods and impact on the economy. These insights can help improve the efficiency and reliability of freight transportation, which plays a vital role in supporting Canada’s economy and ensuring smooth trade operations.
+
+## 1.1. MOTIVATION   
+
+Freight transportation is essential to Canada’s economy, connecting industries, regions, and people. Every shipment—from raw materials like timber and minerals to everyday consumer goods—plays a role in sustaining businesses and fulfilling daily needs. This vast and intricate system not only supports trade but also impacts the cost and availability of goods across the country. By analyzing data from the Canadian Freight Analysis Framework (CFAF), we can gain valuable insights into this system, helping to identify how different factor affect revenue generated for the shipments. With better data-driven decisions, the transportation network can be optimized, reducing costs, improving reliability, and supporting sustainable growth.
+
+### 1.1.1. CONTEXT 
+
+Have you ever wondered how that fresh apple from British Columbia made its way to a grocery store in Toronto? Or how machinery from Alberta’s oil fields ends up in Ontario’s factories? These journeys are part of Canada’s freight system—a vast network of trucks, trains, ships, and planes working together to move goods across the country.
+
+But behind these smooth deliveries are many challenges. Freight companies have to deal with long distances, rising fuel prices, and figuring out the best routes to take. For a country like Canada, which depends so much on trade and transportation, understanding and improving this system is crucial.
+
+The CFAF dataset provides us with a wealth of information about freight movement in Canada—things like where shipments start and end, what’s being transported, how far it’s going, and how much it’s worth. This data is our key to unlocking insights that can make Canada’s freight network more efficient and reliable.
+
+### 1.1.2. PROBLEM 
+
+Starting a freight transportation business requires a clear understanding of the factors that influence revenue. This project uses a **Multiple Linear Regression (MLR) model** to explore how variables such as shipment weight, distance traveled, type of commodity, and mode of transportation impact the revenue earned by carriers in Canada.
+
+The model focuses on predictors such as shipment weight, distance traveled, type of commodity, and mode of transportation. By evaluating these variables, the analysis provides insights into how each factor contributes to revenue generation. For instance, it highlights which transportation modes have more potential to generate revenue potential from specific regions or distances.
+
+By analyzing these factors, the project provides valuable insights for new business owners, helping them identify which regions, shipment types, and transportation modes are most profitable. This information can guide strategic decisions and improve operational efficiency, offering a data-driven approach to entering and succeeding in the freight industry.
+
+### 1.1.3. CHALLENGES 
+
+The major challenge in this project lies in the complexity of the categorical variables. Many of the key variables, such as the origin and destination of shipments, and the type of commodity being transported, are categorical and contain numerous categories. For instance, the origin and destination of shipments each have over 10 unique categories, while the commodity type includes a wide range of different goods. This makes it difficult to build a simple, interpretable model, as the sheer number of categories within each variable increases the potential for interactions between them, leading to a highly dimensional dataset.
+
+Moreover, the nature of freight transportation involves many factors that are likely to influence each other in subtle ways. For example, TonneKm column present in the dataset was formed by multiplying the weight and distance columns which could possibly lead to multicollinearity. Therefore, to avoid this problem, we decided to remove it from our analysis.
+
+## 1.2 OBJECTIVES 
+
+### 1.2.1. OVERVIEW 
+
+What is the overall intent of the project?
+
+The overall intent of this project is to analyze and model transportation data with the primary goal of predicting revenue generated from shipments. By analyzing key factors such as shipment weights, distances, transportation modes, and origin-destination regions, we aim to develop a predictive model that can estimate revenue. This model will provide valuable insights to logistics and transportation companies, helping them optimize their operations, improve decision-making, and identify strategies to increase profitability.
+
+### 1.2.2. GOALS & RESEARCH QUESTIONS 
+
+**Goals:**
+
+- Data Cleaning and Preparation: To clean and preprocess the transportation data, addressing missing values, standardizing formats, and categorizing relevant information, ensuring that the dataset is ready for modeling and analysis.
+
+- Segmentation Analysis: To categorize shipments by various factors, including regions (East vs. West Canada) and commodity types, to understand how these factors influence revenue generation and to identify high-performing segments.
+
+- Descriptive Analysis: To perform a descriptive analysis of the dataset, summarizing key variables such as value, shipment weight, and transportation mode. This will help identify patterns and trends that could impact revenue generation.
+
+- Revenue Prediction Modeling: To develop a multiple linear regression (MLR) model that predicts revenue based on independent variables such as shipment weight, mode of transport, and distance. This predictive model will help forecast future revenues and enable businesses to optimize their operations for better financial outcomes.
+
+**Research Objective:**
+
+What is the impact of shipment weight, distance traveled, commodity type, and transportation mode on the revenue generated by freight carriers in Canada, and how can these insights help new business owners optimize their operations and profitability?
+
+
+# 2. METHODOLOGY
+
+## 2.1 DATA  
+
+The Canadian Freight Analysis Framework (CFAF) integrates data from multiple sources, including Statistics Canada surveys (e.g., Trucking Commodity Origin and Destination Survey and Rail Commodity Origin and Destination Statistics) and other administrative data. Managed by Statistics Canada and available at Statistics Canada CFAF page, this dataset focuses on freight shipment characteristics such as value, weight, commodity type, origin, destination, tonne-kilometres, and revenue, categorized by transport mode. The data are used for analyzing infrastructure and trade flows. Data confidentiality is ensured by suppressing sensitive air freight data as required by the Statistics Act
+
+The CFAF compiles data from pre-existing reports rather than traditional sampling methods. Biases can exist due to exclusions, such as non-trucking operations or suppressed air freight data. Air freight data is based on the Airport Activity Survey and Quarterly Civil Aviation Survey, but lacks commodity-level detail, leading to an underestimation of total air shipments. Rail data comes from the Rail Commodity Origin and Destination Statistics from Transport Canada, covering major carriers like Canadian National (CN) and Canadian Pacific (CP), as well as regional carriers. Road transportation data primarily comes from the Trucking Commodity Origin and Destination Survey, which tracks for-hire trucking activities but excludes trucking by businesses in other industries such as manufacturing or retail sales.
+
+Each observation represents a shipment, detailing factors like commodity, transport mode, distance, weight, and revenue, with distances. 
+
+Link to the dataset: https://www150.statcan.gc.ca/n1/pub/50-503-x/50-503-x2018001-eng.htm
+
+Data is collected annually and cover air, rail and road transport for both domestic and trans-border shipments. The dataset's complexity, especially in trucking, requires careful interpretation of year-over-year comparisons. The dataset represents a comprehensive population of freight shipments in Canada, covering all domestic and trans-border shipments across air, rail, road, and water transport modes. It includes detailed information on shipment characteristics, ensuring it captures a full scope of transportation activity rather than just a sample.The latest version of the data was released on May 14, 2020. The data timeline spans from 2011 to 2017 and has around 58721 rows and the following columns: 
+
+![](DataTable.png)
+
+*Table 1: A summary of the dataset, including column name, data type, description of the column,measurement scale and variable type (dependent/independent).*
+
+We have created a table that provides a structured overview of key shipment data variables. The table includes information on field names such as "Mode," "Shipments," "Weight," and "Revenue," along with their respective data types, which are either qualitative or quantitative. Each variable is described to clarify its meaning, such as "The mode by which the shipment(s) moved" for the "Mode" field or "The total weight of the shipments" for "Weight." The measurement scales are also defined, with units like "Kilograms" for weight and "Dollars" for revenue. Furthermore, the table specifies the variable types, where most variables are independent, except for "ShipmentValue," which is categorized as dependent. This table serves as a useful reference to understand the characteristics and relationships of the shipment data.
+
+## 2.2 DISTRIBUTION OF WORK. 
+
+![](Work_Distribution.png)
+
+
+The roles within our group were assigned equitably, reflecting individual strengths while ensuring a balanced effort. Arshdeep was responsible for Data Cleaning and Preparation, Exploratory Data Analysis (EDA), Building First-Order Models, and Higher-Order Models. Hritvik focused on Categorizing Variables, Building First-Order Models, Building Interaction Models, and Assumptions Checking. Maharsh contributed to Exploratory Data Analysis (EDA), Building Interaction Models, Higher-Order Models, and Hypothesis Testing. Prabhnoor took charge of Data Cleaning and Preparation, Categorizing Variables, Assumptions Checking, and Model Comparisons. Finally, Satyam worked on Building Interaction Models, Hypothesis Testing, Model Comparisons, and Report Writing. This allocation ensured that tasks were distributed fairly, playing to each member's expertise while maintaining equity in the workload.
+
+## 2.3 Variables Selection. 
+
+To streamline the dataset for multiple linear regression (MLR), certain columns were removed based on their irrelevance or potential to introduce redundancy and multicollinearity. Year was excluded because it is a sequential variable that does not directly explain revenue. TonneKm was removed as it is derived from Weight and Distance, which are already included, thus avoiding multicollinearity. Similarly, DestCtry and OrigCtry were excluded since the analysis focuses solely on Canada, making international data irrelevant. Finally, DestCMA and OrigCMA were dropped as the broader provincial variables (DestProv and OrigProv) sufficiently capture geographic patterns without the added complexity of sub-provincial data.
+
+Revenue was chosen as the predictor variable because it represents the financial performance of the freight transportation process, aligning the analysis with business objectives. As the ultimate measure of earnings from shipments, it depends on various factors such as shipment weight, distance, transportation mode, and commodity type. Modeling revenue allows for identifying the most impactful factors, providing insights into operational efficiencies, and guiding strategies to optimize earnings and logistics.
+
+The retained variables were chosen for their relevance in explaining Revenue. Mode, SCTGGroup, OrigProv, and DestProv capture key transportation and geographic characteristics. Weight, Distance, and Shipments reflect operational scale and logistics, which directly influence revenue. Finally, Value of goods shipped is included to account for pricing variations related to commodity worth. Together, these variables ensure a comprehensive analysis, balancing operational, geographic, and economic factors in freight transportation.
+
+
+## 2.4 APPROACH  
+
+To build the model, we will begin with a comprehensive data cleaning process to ensure that the data is accurate, consistent, and free of any missing values. We will handle missing data using appropriate imputation techniques, ensuring that no critical information is lost. Once the data is clean, we will drop any irrelevant columns or features that do not contribute to the analysis, ensuring the dataset is focused on the key variables that drive the problem at hand. We will also evaluate the data for potential transformations, such as encoding categorical variables, to prepare it for the modeling phase.
+
+With the cleaned and prepared dataset, we will proceed to build a multiple linear regression (MLR) model. We will carefully select the predictors that have the most relevance to the outcome variable, ensuring a strong and meaningful relationship between the predictors and the dependent variable. Throughout the process, we will iteratively refine the model, testing different combinations of features and checking for any issues, such as multicollinearity, that might impact model performance. This iterative approach will allow us to fine-tune the model and achieve the most accurate and interpretable results.
+
+## 2.5 WORKFLOW  
+
+Following are the detailed list of steps followed during the project:  
+
+1. Keep only the relevant columns in the dataset. Drop the following columns: Year, TonneKm, DestCtry, OrigCtry, DestCMA, OrigCMA. 
+
+2. Rename the columns and drop rows with null values. 
+
+3. Combine categories in categorical columns to form new columns. Combine destinations and origins of transportation to western and eastern provinces. Also, combine similar commodity types to finally form the following columns: OrigRegion, DestRegion and TypeCommodity 
+
+4. Create full additive model and check if multicollinearity assumption is met. 
+
+5. Use Stepwise Regression Procedure and All-Possible-Regressions Selection Procedure to pick the best variables for a first order model. 
+
+6. Build interaction and higher order models iteratively by removing the insignificant interaction/higher order terms respectively. 
+
+7. Check all assumptions for the best fit model. 
+
+![](workflow.jpeg)
+*Figure 1: Workflow of the project*
+
+**Importing Libraries**
+
+```{r,include=FALSE}
+invisible(library(dplyr))
+invisible(library(car))
+invisible(library(olsrr))
+invisible(library(leaps))
+invisible(library(GGally))
+```
+
+Here's a brief overview of how we have used the above libraries:
+
+<br>
+
+1. dplyr: A powerful package for data manipulation1. It provides a set of functions for efficiently filtering, sorting, and transforming data frames. Key functions we used:
+
+- mutate(): Create new variables
+- summarize(): Compute summary statistics
+
+2. car (Companion to Applied Regression): Offers functions for regression diagnostics, ANOVA, and other statistical analyses3. Notable functions we used:
+
+- vif(): Compute Variance Inflation Factors
+
+3. olsrr (Tools for OLS Regression): Provides tools for building OLS regression models3. Key features we used:
+
+- Comprehensive regression output
+- Residual diagnostics
+- Heteroskedasticity tests
+- Collinearity diagnostics
+
+4. leaps: Used for model selection in regression. Main functions we used:
+
+- regsubsets(): Performs best subset selection
+- summary(): Summarizes results of subset selection
+
+5. GGally: Extends ggplot2 for creating complex visualizations124. Notable functions we used:
+
+- ggpairs(): Creates a matrix of plots for pairwise comparisons
+- ggcorr(): Visualizes correlation matrices (can use this) *
+
+
+# Reading the table
+
+```{r}
+data = read.csv('freight.csv') 
+head(data)
+str(data)
+```
+
+# Removing columns that are not necessary (for explanation refer to section 2.3)
+
+```{r}
+updated_data = data[,!names(data) %in% c("Year","TonneKm","DestCtry","OrigCtry","DestCMA","OrigCMA")]
+head(updated_data)
+```
+
+We removed columns that were not necessary for our analysis to simplify the dataset and improve model efficiency. Specifically, columns such as "Year," "TonneKm," "DestCtry," "OrigCtry," "DestCMA," and "OrigCMA" were excluded as they did not contribute directly to predicting the target variable (revenue) in our model. This step ensures that we are working with a more focused and relevant set of features, which helps prevent overfitting and enhances the interpretability of the model.
+
+# Data Cleaning and Wrangling
+
+```{r}
+update_data <- updated_data %>%
+  mutate(across(c(Weight, Revenue, Distance,Value, Shipments), ~ as.numeric(gsub(",", "", .))))
+
+update_data = na.omit(update_data)
+
+# Define West and East Canada provinces
+west_provinces <- c("BC", "AB", "SK", "MB")
+east_provinces <- c("ON", "QC", "NB", "NS", "PE", "NL")
+
+Agri_and_food <- c("AGRI", "FOOD")
+NaturalR_raw <- c("MNRLS", "COAL", "FUELS", "FRPAP")
+Manafacturing_Misc_Goods <- c("PLCHM", "BMETL", "TRANS", "OTHMF", "WASTE", "MISC")
+                      
+Mode = c("AR", "RL", "TF")
+
+# Create a new column categorizing provinces
+update_data$OrigRegion <- ifelse(update_data$OrigProv %in% west_provinces, "West Canada",
+                  ifelse(update_data$OrigProv %in% east_provinces, "East Canada", "Other Parts"))
+update_data$DestRegion <- ifelse(update_data$DestProv %in% west_provinces, "West Canada",
+                  ifelse(update_data$DestProv %in% east_provinces, "East Canada", "Other Parts"))
+update_data$TypeCommodity <- ifelse(update_data$SCTGGroup %in% Agri_and_food, "Agri_Food",
+                  ifelse(update_data$SCTGGroup %in% NaturalR_raw, "NaturalR_raw",
+                  ifelse(update_data$SCTGGroup %in% Manafacturing_Misc_Goods, "Manafacturing_Misc_Goods", "Other")))
+
+update_data <- update_data %>%
+  mutate(Mode = case_when(
+    Mode == "AR" ~ "Air",
+    Mode == "RL" ~ "Rail",
+    Mode == "TF" ~ "Truck",
+    TRUE ~ "other"  # For any unmatched values
+  ))
+
+freight_data = update_data[,!names(update_data) %in% c("OrigProv","DestProv","SCTGGroup")]
+head(freight_data)
+
+```
+
+- We performed several data cleaning and wrangling steps to prepare the dataset for modeling. First, we removed commas from numeric columns like "Weight," "Revenue," "Distance," "Value," and "Shipments" to ensure that they are correctly interpreted as numeric values. We then handled missing data by omitting rows with any missing values to avoid potential bias in the model.
+
+- Next, we created new categorical columns, such as "OrigRegion" and "DestRegion," to classify the origin and destination provinces into regions (West Canada, East Canada, and Other Parts) based on predefined province lists. We also categorized commodities into groups like "Agri_Food," "NaturalR_raw," and "Manufacturing_Misc_Goods" for easier analysis. Additionally, we transformed the "Mode" of transportation into more meaningful categories ("Air," "Rail," and "Truck").
+
+- We chose to group the categorical variables to reduce the complexity of the model. With 10 variables in the dataset, including interaction terms, the model would become very large and computationally expensive. Grouping the categorical variables helps in simplifying the analysis, making the model more manageable without sacrificing essential information. These steps were necessary to ensure the dataset was clean, well-structured, and ready for modeling.
+
+## Printing the structure of the data. 
+
+```{r}
+str(freight_data)
+```
+
+## Exploratory Data Analysis.  
+
+### Revenue distribution by mode of Transport (Rail, Air and Road). 
+
+```{r}
+ggplot(freight_data, aes(x = Mode, y = Revenue)) +
+  geom_bar(stat = "identity", aes(fill = Mode), position = "dodge") +
+  labs(title = "Revenue Distribution by Mode of Transport", 
+       x = "Mode of Transport", 
+       y = "Revenue") +
+  scale_y_continuous(labels = scales::comma) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+*Figure 2: Revenue vs Mode of Transport *
+
+In the bar chart, we graph the revenue distribution against the different models of transport:Air, Rail, and Truck. From the graph we conclude that truck generate the highest revenue among the modes of transport, contributing to more revenue than both of the other modes combined. Air transport contributes to the least revenue among the three, hinting that truck as a mode of transportation is a dominant contributor to total revenue generated. 
+
+### Total Revenue by Origin Region
+
+```{r}
+total_revenue <- freight_data %>%
+  group_by(OrigRegion) %>%
+  mutate(total_revenue = sum(Revenue, na.rm = TRUE)) %>%
+  distinct(OrigRegion, .keep_all = TRUE)
+
+ggplot(total_revenue, aes(x = "", y = total_revenue, fill = OrigRegion)) +
+  geom_col(color = "black") +
+  coord_polar(theta = "y") +
+  labs(title = "Total Revenue by Origin Region") +
+  theme_void()+
+  geom_text(aes(label = scales::comma(total_revenue)),
+            position = position_stack(vjust = 0.5),
+            color = "white", size = 4)  
+
+```
+
+*Figure 3 Pie Chart for Total Revenue by Origin region*
+
+From the pie chart for the total revenue contribution by different origin regions we conclude that West Canada contributes the most to revenue (approximately 162.89 billion) in terms of proportion of revenue by origin region followed closely by East Canada with about (152.28 billion) and Other Parts contributing 69.41 billion combined. Overall, West and East Canadian regions have comparable contributions to revenue. 
+
+
+### Revenue vs distance travelled
+
+```{r}
+ggplot(freight_data, aes(x = Distance, y = Revenue)) +
+  geom_point(aes(color = Mode), alpha = 0.6) +
+  geom_smooth(method = "lm", aes(color = "lm"), se = FALSE, linetype = "dashed") +
+  labs(title = "Revenue vs Distance Travelled", x = "Distance (km)", y = "Revenue") +
+  theme_minimal()
+```
+*Figure 4: Revenue vs Distance travelled*
+
+The scatterplot shows how revenue is related to the distance travelled to complete the shipment for the different transport modes with Air transport in pink, Rail transport in blue and Truck transport in purple. We observe that generally larger distances generate higher revenue. We see this trend most prominently for the truck mode of transport.
+
+
+
+### Revenue vs Weight
+
+```{r}
+ggplot(freight_data, aes(x = Weight, y = Revenue)) +
+  geom_point(aes(color = Mode), alpha = 0.6) +
+  geom_smooth(method = "lm", aes(color = "lm"), se = FALSE, linetype = "dashed") +
+  labs(title = "Revenue vs. Weight of Shipments", x = "Weight (kg)", y = "Revenue") +
+  theme_minimal()
+```
+*Figure 5: Revenue vs Weight*
+
+Similar to the previous scatterplot, this scatterplot shows how revenue is related to the weight of the shipment for the different transport modes with Air transport in pink, Rail transport in blue and Truck transport in purple. We observe that revenue generally increases with shipment weight, observed by the positively sloping trendline. We see this trend most prominently for the truck mode of transport.Truck and Rail have higher-weight shipments, generating substantial revenue.
+
+### Heatmap of Revenue by Origin and Destination Region
+
+```{r}
+
+revenue_heatmap <- freight_data %>%
+  group_by(OrigRegion, DestRegion) %>%
+  summarise(total_revenue = sum(Revenue, na.rm = TRUE), .groups = "drop")
+
+  
+ggplot(revenue_heatmap, aes(x = OrigRegion, y = DestRegion, fill = total_revenue)) +
+  geom_tile(color = "white") +  # White border for each tile
+  scale_fill_gradient(low = "lightblue", high = "darkblue") +  # Color scale from light blue to dark blue
+  labs(title = "Heatmap of Revenue by Origin and Destination Region",
+       x = "Origin Region", y = "Destination Region", fill = "Total Revenue") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+*Figure 6: Heatmap of Revenue by Origin and Destination Region*
+
+The heatmap shows the relation between total revenue generated by combinations of origin and destination regions with darker shades of blue indicating higher aggregated revenues than lighter shades of blue. Shipments from within West Canada and East Canada bring in the highest revenues. Transportation from West Canada to West Canada brings in the most revenue for the carrier, followed by East Canada to East Canada.
+
+
+# Building a First Order Model
+
+```{r}
+full_additive_model = lm(Revenue~ factor(Mode) + factor(OrigRegion) + factor(DestRegion) + factor(TypeCommodity) + Shipments + Weight + Value + Distance,data = freight_data) 
+summary(full_additive_model)
+```
+
+
+# Check for multicollinearity using VIF
+
+VIF measures how much a predictor is explained by other predictors. A high VIF shows multicollinearity, indicating that predictors may need adjustment.
+
+```{r}
+vif(full_additive_model)
+```
+**Discussion:**. 
+
+VIF is used to assess multicollinearity, which occurs when predictor variables in a regression model are highly correlated.
+
+Shipments (3.25): Moderate multicollinearity, within the limits. \
+Weight (1.69): Slight multicollinearity, within the limits. \
+Value (2.25): Moderate multicollinearity but acceptable (less than 5).\
+Distance (1.31): Low multicollinearity. \
+
+- No severe multicollinearity issues are detected in the model. \
+- The highest normalized VIF value, 3.25 for Shipments, suggests a slight relationship with other predictors, but it is not concerning. \
+- We can proceed with these variables as they don't have multicollinearity. \
+
+
+**Performing Full model test using Anova to see “Is this multiple regression model any good at all?”**. 
+
+ANOVA is used to compare models or groups to see if there are significant differences. In regression, it evaluates whether the model as a whole is statistically significant.
+
+- **Null Hypothesis (H0):**
+  \[
+  \beta_1 = \beta_2 = \dots = \beta_n = 0
+  \]
+  This implies that none of the independent variables(Mode, OrigRegion, DestRegion, TypeCommodity, Shipments, Weight, Value, Distance) have any significant effect on the revenue.
+
+- **Alternative Hypothesis (Ha):**
+  \[
+  \text{At least one} \ \beta_i \neq 0, \quad \text{for} \ i = 1, 2, \dots, p
+  \]
+  This implies that at least one of the independent variables has a significant effect on the Revenue.
+
+```{r}
+reg1=lm(Revenue~ factor(Mode) + factor(OrigRegion) + factor(DestRegion) + factor(TypeCommodity) + Shipments + Weight + Value + Distance,data = freight_data)  # (Full) model with all variables
+reg2=lm(Revenue~1, data=freight_data) # Model with only intercept
+print(anova(reg2,reg1)) # We compare the NULL model with the full model
+```
+**Discussion**
+
+Given the large F-statistic (19254) and the extremely small p-value (< 2.2e-16), which is much less than the significance level alpha = 0.05, we reject the null hypothesis (H0). This provides compelling evidence that at least one of the independent variables in the model is significantly related to the dependent variable (Revenue).
+
+In other words, the results suggest that the model variables (such as Mode, OrigRegion, DestRegion, TypeCommodity, Shipments, Weight, Value, and Distance) collectively have a significant impact on Revenue.
+
+
+**Individual t_test**
+
+This test checks the significance of each predictor in the model. It determines whether a predictor has a meaningful impact on the response variable.
+
+**Hypothesis**. 
+
+Let's define the null hypothesis here.  
+
+- **Null Hypothesis** \( H_0 \): 
+  \[
+  \beta_k = 0 
+  \]
+  (At least one of the independent variables does not have a significant effect on Revenue, meaning variable \( k \) has no effect.)
+
+- **Alternative Hypothesis** \( H_a \): 
+  \[
+  \beta_k \neq 0 \quad (k = 1, 2, \dots, p)
+  \]
+  (Each independent variable has a significant effect on Revenue, meaning variable \( k \) influences Revenue)
+ 
+**Calculating p-value**. 
+
+```{r}
+summary(full_additive_model)
+```
+
+**Discussion**. 
+
+Based on the summary of the model, we can see that the p-value = 2.2e-16 which is significantly less as compared to significance level of 0.05. Hence, we reject the null hypothesis. Therefore, we can say that each of the independent variables (Mode, OrigRegion, DestRegion, TypeCommodity, Shipments, Weight, Value, Distance) has a significant effect on Revenue generated from the shipments.
+
+- The adjusted $R^2$ value of 0.8017 indicates that approximately 80.17% of the variability in the dependent variable is explained by the independent variables in the model.The high value suggests a strong relationship between the predictors and the response variable.
+
+- The Residual Standard Error of 13920000 indicates that, on average, the model's predictions deviate from the actual values by about 13920000 units.
+
+
+# Using stepwise regression to find the best first order model. 
+
+Although we understand that stepwise regression is typically used to identify the significant predictors when dealing with many independent variables, but as per this project we're showcasing it to demonstrate the methodology we used in class.
+
+```{r}
+full_stepwise_model = lm(Revenue ~ Mode + OrigRegion + DestRegion + TypeCommodity + Shipments + Weight + Value + Distance, data = freight_data)
+ols_stepwise_model = ols_step_both_p(full_stepwise_model,p_enter = 0.1 ,p_remove = 0.3 ,details=TRUE)
+```
+**Discussion:**
+
+Stepwise selection is an automated procedure that incrementally adds (or removes) variables to a model based on their contribution to the model, which is often measured by $R^2$. 
+
+The first four variables (Weight, Distance, Value, Shipments) contribute the most to the model's fit. Together, they achieve an $R^2$ of 0.798, while the rest of the variables added after Step 4 (e.g., Mode, TypeCommodity, OrigRegion, DestRegion) contribute very little to $R^2$, indicating they have minimal independent effect. The final model would have all 8 variables, 
+
+Revenue ~ Shipments + Value + Weight + Distance + Mode + TypeCommodity + OrigRegion + DestRegion 
+
+# OLS Best Subset Selection (ols_best_subset_p):
+
+This method identifies the best combination of predictors for the model. It helps find the most effective predictors while balancing model complexity.
+
+```{r}
+best_subset_model = ols_step_best_subset(full_stepwise_model,details=TRUE)
+best_subset_model$metrics
+```
+
+```{r}
+rsquare=c((best_subset_model$metrics)$rsquare)
+AdjustedR=c((best_subset_model$metrics)$adjr)
+cp=c((best_subset_model$metrics)$cp)
+AIC=c((best_subset_model$metrics)$aic)
+cbind(rsquare,AdjustedR,cp,AIC)
+```
+
+**Discussion:** 
+
+Based on the analysis of $R^2$, Adjusted $R^2$, Mallow's Cp, and AIC, the final model selected at Step 8 achieves the best overall balance between explanatory power (R^2 = 0.8017, Adjusted $R^2$ = 0.8016), model parsimony (Cp = 13, close to the total number of predictors), and fit quality (AIC = 2042730, the lowest), indicating it is the optimal model for predicting the dependent variable.
+
+
+```{r}
+par(mfrow = c(3, 1), mar = c(2, 2, 4, 4))
+plot(AIC,type = "o",pch=10, xlab="Number of Variables",ylab= "AIC", main="Figure 7: AIC vs Number of variables")
+plot(cp,type = "o",pch=10, xlab="Number of Variables",ylab= "cp", main="Figure 8: cp vs Number of variables")
+plot(AdjustedR,type = "o",pch=10, xlab="Number of Variables",ylab= "AdjustedR", main="Figure 9: AdjustedR vs Number of variables")
+```
+
+**Discussion:** 
+
+The graphical interpretation are as follows:
+
+*Figure 7*: The AIC (Akaike Information Criterion) plot indicates that the optimal model complexity is reached when 8 variables are included. At this point, the AIC value reaches its lowest point, suggesting the best balance between model fit and parsimony.
+
+*Figure 8*: The cross-validation plot (cp graph) indicates that the optimal model complexity is reached when 8 predictor variables are included. At this point, the cross-validation error, as measured by the cp statistic, reaches its lowest value. This suggests that a model using 8 variables provides the best balance between model fit and complexity.
+
+*Figure 9*: The adjusted R-squared graph indicates that the optimal model performance is reached when incorporating 8 predictor variables. This point represents the peak of the adjusted R-squared value, suggesting that this number of variables provides the best balance between model complexity and explanatory power.
+
+
+# For the purpose of considering BIC, we will be using the regsubsets function. 
+
+```{r}
+best_subset_bic=regsubsets(Revenue ~ Shipments + Value + Weight + Distance + Mode + TypeCommodity + OrigRegion + DestRegion, data= freight_data, nv=8 )
+
+BIC=c(summary(best_subset_bic)$bic)
+cbind(BIC)
+
+plot(BIC,type = "o",pch=8, xlab="Number of Variables",ylab= "BIC", main="Figure 10: BIC vs Number of variables ")
+
+```
+
+*Figure 10*: The BIC graph indicates that the optimal number of variables is eight, as this is where the Bayesian Information Criterion (BIC) reaches its minimum value. This suggests that a model with eight variables provides the best balance between model complexity and goodness of fit according to the BIC metric.
+
+# Equation of best additive model. 
+
+The regression model equation is:
+
+\begin{multline*}
+\text{Revenue} = 6254000 - 4575000) * \text{Mode(Rail)} - 6388000) * \text{Mode(Truck)} \\
++ 2626000 * \text{OrigRegion(Other Parts)} + 1284000 * \text{OrigRegion(West Canada)} \\
++ 4736000 * \text{DestRegion(Other Parts)} + 168100 * \text{DestRegion(West Canada)}\\
+- 1682000 * \text{TypeCommodity(Manafacturing Misc Goods)} \\
+- 1341000 * \text{TypeCommodity(NaturalR raw)} - 41.70 * \text{Shipments}\\
++ 0.0198 * \text{Weight} + 0.003593 * \text{Value} + 0.4820 * \text{Distance}
+\end{multline*}
+
+
+**Where**:
+
+- \(\text{Revenue}\) is the dependent variable.
+- \(\text{Mode}\), \(\text{OrigRegion}\), \(\text{DestRegion}\), and \(\text{TypeCommodity}\) are categorical variables, with their respective levels.
+- \(\text{Shipments}\), \(\text{Weight}\), \(\text{Value}\), and \(\text{Distance}\) are continuous predictor variables.
+
+
+# Interaction Model
+
+# First Interaction model (Considering only interactions between numerical:numerical terms or categorical:numerical terms). 
+
+Interaction terms are added to a model to understand how two or more predictors work together to influence the outcome variable, beyond what they do individually. For example, the impact of one predictor might change depending on the level of another. By including interaction terms, we can examine these relationships in more detail and gain a clearer picture of how the predictors interact. This is especially useful when we think the relationship between the predictors and the outcome isn’t simply additive.
+
+```{r}
+interaction_model_1 = lm(Revenue~ factor(Mode) + factor(OrigRegion) + factor(DestRegion) + factor(TypeCommodity) + Shipments + Weight + Value + Distance + Shipments:Weight + Shipments:Value + Shipments:Distance + Weight:Value + Weight:Distance + Value:Distance + factor(Mode):Shipments + factor(Mode):Weight + factor(Mode):Value + factor(Mode):Distance + factor(OrigRegion):Shipments + factor(OrigRegion):Weight + factor(OrigRegion):Value + factor(OrigRegion):Distance + factor(DestRegion):Shipments + factor(DestRegion):Weight + factor(DestRegion):Value + factor(DestRegion):Distance + factor(TypeCommodity):Shipments + factor(TypeCommodity):Weight + factor(TypeCommodity):Value + factor(TypeCommodity):Distance  ,data = freight_data) 
+summary(interaction_model_1)
+
+```
+
+**Discussion:**
+
+Since all the terms are significant in the above interaction model as the p-value = 2.2e-16 is significantly low as comapred to significance level of 0.05, therefore this is the final interaction model.
+
+- The interaction model fits the data much better than the main-effects-only model. Its residual standard error (RSE) is 8,909,000, much lower than the RSE of the main-effects-only model, which is 13,920,000. This indicates the interaction model predicts outcomes more accurately. 
+
+- Similarly, the adjusted R-squared for the interaction model is 0.9188, meaning it explains 91.88% of the variability in revenue, compared to 0.8017 in the main-effects-only model. These results show that adding interaction terms improves the model’s ability to explain and predict revenue effectively.
+
+
+### Regression Model Equation for interaction model is
+
+\begin{multline*}
+\text{Revenue} = -6.649 \times 10^5 
++ 8.246 \times 10^5 (\text{factor(Mode)Rail}) 
++ 3.407 \times 10^5 (\text{factor(Mode)Truck}) \\
++ 8.764 \times 10^5 (\text{factor(OrigRegion)Other Parts}) 
++ 1.902 \times 10^5 (\text{factor(OrigRegion)West Canada}) \\
+- 4.052 \times 10^5 (\text{factor(DestRegion)Other Parts}) 
++ 5.572 \times 10^4 (\text{factor(DestRegion)West Canada}) \\
++ 7.192 \times 10^5 (\text{factor(TypeCommodity)Manufacturing\_Misc\_Goods}) 
+- 1.608 \times 10^5 (\text{factor(TypeCommodity)NaturalR\_raw}) \\
++ 2.747 (\text{Shipments}) 
++ 2.104 (\text{Weight}) 
+- 3.909 \times 10^{-3} (\text{Value}) 
++ 2.016 \times 10^{-1} (\text{Distance}) \\
+- 1.848 \times 10^{-9} (\text{Shipments} \times \text{Weight}) 
+- 2.035 \times 10^{-10} (\text{Shipments} \times \text{Value}) \\
+- 2.299 \times 10^{-7} (\text{Shipments} \times \text{Distance}) 
++ 1.492 \times 10^{-13} (\text{Weight} \times \text{Value}) \\
+- 2.360 \times 10^{-12} (\text{Weight} \times \text{Distance}) 
++ 8.514 \times 10^{-12} (\text{Value} \times \text{Distance}) \\
+- 7.364 \times 10^2 (\text{factor(Mode)Rail} \times \text{Shipments}) 
++ 7.994 \times 10^1 (\text{factor(Mode)Truck} \times \text{Shipments}) \\
+- 2.085 (\text{factor(Mode)Rail} \times \text{Weight}) 
+- 2.093 (\text{factor(Mode)Truck} \times \text{Weight}) \\
++ 5.540 \times 10^{-3} (\text{factor(Mode)Rail} \times \text{Value}) 
++ 3.906 \times 10^{-3} (\text{factor(Mode)Truck} \times \text{Value}) \\
++ 7.333 (\text{factor(Mode)Rail} \times \text{Distance}) 
++ 4.532 (\text{factor(Mode)Truck} \times \text{Distance}) \\
++ 2.471 \times 10^2 (\text{factor(OrigRegion)Other Parts} \times \text{Shipments}) \\
+- 1.944 \times 10^2 (\text{factor(OrigRegion)West Canada} \times \text{Shipments}) \\
++ 1.312 \times 10^{-2} (\text{factor(OrigRegion)Other Parts} \times \text{Weight}) 
++ 1.520 \times 10^{-2} (\text{factor(OrigRegion)West Canada} \times \text{Weight}) \\
++ 2.482 \times 10^{-3} (\text{factor(OrigRegion)Other Parts} \times \text{Value}) 
+- 1.106 \times 10^{-3} (\text{factor(OrigRegion)West Canada} \times \text{Value}) \\
+- 1.121 \times 10^{-1} (\text{factor(OrigRegion)Other Parts} \times \text{Distance}) 
++ 1.080 \times 10^{-1} (\text{factor(OrigRegion)West Canada} \times \text{Distance}) \\
++ 7.577 (\text{factor(DestRegion)Other Parts} \times \text{Shipments}) 
++ 1.173 \times 10^2 (\text{factor(DestRegion)West Canada} \times \text{Shipments}) \\
++ 1.664 \times 10^{-2} (\text{factor(DestRegion)Other Parts} \times \text{Weight}) 
+- 6.132 \times 10^{-3} (\text{factor(DestRegion)West Canada} \times \text{Weight}) \\
++ 3.937 \times 10^{-3} (\text{factor(DestRegion)Other Parts} \times \text{Value}) 
++ 1.850 \times 10^{-3} (\text{factor(DestRegion)West Canada} \times \text{Value}) \\
++ 3.837 \times 10^{-2} (\text{factor(DestRegion)Other Parts} \times \text{Distance}) 
++ 1.203 \times 10^{-2} (\text{factor(DestRegion)West Canada} \times \text{Distance}) \\
++ 4.730 \times 10^1 (\text{factor(TypeCommodity)Manufacturing\_Misc\_Goods} \times \text{Shipments}) \\
+- 1.234 \times 10^2 (\text{factor(TypeCommodity)NaturalR\_raw} \times \text{Shipments}) \\
++ 4.021 \times 10^{-3} (\text{factor(TypeCommodity)Manufacturing\_Misc\_Goods} \times \text{Weight}) \\
+- 2.193 \times 10^{-3} (\text{factor(TypeCommodity)NaturalR\_raw} \times \text{Weight}) \\
++ 2.312 \times 10^{-4} (\text{factor(TypeCommodity)Manufacturing\_Misc\_Goods} \times \text{Value}) \\
+- 1.745 \times 10^{-3} (\text{factor(TypeCommodity)NaturalR\_raw} \times \text{Value}) \\
+- 4.691 \times 10^{-1} (\text{factor(TypeCommodity)Manufacturing\_Misc\_Goods} \times \text{Distance}) \\
++ 3.233 \times 10^{-1} (\text{factor(TypeCommodity)NaturalR\_raw} \times \text{Distance})
+\end{multline*}
+
+**Where**:
+
+- \(\text{Revenue}\) is the dependent variable in dollars.
+- \(\text{Mode}\), \(\text{OrigRegion}\), \(\text{DestRegion}\), and \(\text{TypeCommodity}\) are categorical variables, with their respective levels.
+- \(\text{Shipments}\), \(\text{Weight}\), \(\text{Value}\), and \(\text{Distance}\) are continuous predictor variables with units numeric values, kg ,dollars and Kms respectively .
+
+
+We have 4 categorical variables with 3 levels each, which means we would have total $3 * 3 * 3 * 3$ = 81 sub models. To maintain clarity in the report, we would be only writing equations for a few sub models.
+
+
+**Sub Models**. 
+
+*Submodel 1:* For the intercept term, Mode = Air,OrigRegion = East Canada, Dest Region = East Canada, TypeCommodity = Agri_and_food. 
+
+
+\begin{multline*}
+\hat{Revenue} = -664900 + 27.47 * Shipments   -0.0039 * Value + 2.10 * Weight + 0.2016 * Distance \\
+-0.00000000184 * Shipments:Weight -0.000000000203495450*Shipments:Value \\
+-0.000000229938079725*Shipments:Distance  + 0.000000000000149174*Weight:Value \\
+-0.000000000002359753*Weight:Distance + 0.000000000008514026*Value:Distance
+\end{multline*}
+
+**Interpretations for Submodel 1**. 
+
+1. X_Weight. 
+
+\begin{multline*}
+Revenue = -664900 + Weight*(2.10 - 0.00000000184*Shipments + 0.000000000000149174*Value \\
+- 0.000000000002359753*Distance)
+\end{multline*}
+
+For every additional Weight, the revenue increases by (2.10 - 0.00000000184 * Shipments + 0.000000000000149174 * Value - 0.000000000002359753 * Distance) with the baseline effect of -664900. This equation shows how each additional Weight impacts the Revenue, with the corresponding influence from Shipments, Value and Distance.
+
+2. X_Shipments. 
+
+\begin{multline*}
+Revenue=-664900 + Shipments(27.47 - 0.00000000184*Weight + 0.000000000203495450*Value \\
+- 0.000000229938079725*Distance)
+\end{multline*}
+
+For every additional Shipment, the revenue increases by (27.47 - 0.00000000184 * Weight + 0.000000000203495450 * Value - 0.000000229938079725 * Distance) with the baseline effect of -664900. This equation shows how each additional Shipment impacts the Revenue, with the corresponding influence from Weight, Value and Distance.
+
+3. X_Value. 
+
+\begin{multline*}
+Revenue=-664900 + Value(-0.0039 - 0.000000000203495450*Shipments + 0.000000000000149174*Weight \\
++ 0.000000000008514026*Distance)
+\end{multline*}
+
+For every additional Value, the Revenue increases by (-0.0039 - 0.000000000203495450 * Shipments + 0.000000000000149174 * Weight + 0.000000000008514026 * Distance) with the baseline effect of -664900. This equation shows how each additional Value impacts the Revenue, with the corresponding influence from Weight, Shipment and Distance.
+
+4. X_Distance. 
+
+\begin{multline*}
+Revenue = -664900 + Distance(0.2016 - 0.000000229938079725*Shipments - 0.000000000002359753*Weight \\
++ 0.000000000008514026*Value)
+\end{multline*}
+
+For every additional Distance, the Revenue increases by (0.2016 - 0.000000229938079725 * Shipments - 0.000000000002359753 * Weight + 0.000000000008514026 * Value) with the baseline effect of -664900. This equation shows how each additional Value impacts the Revenue, with the corresponding influence from Weight, Shipment and Value. 
+
+
+*Submodel 2*: Mode = Rail, OrigRegion = East Canada, DestRegion = East Canada, TypeCommodity = Agri_Food. 
+
+Revenue = 
+\begin{multline*}
+\hat{Revenue} = -664900 + 27.47 * Shipments + 2.104 * Weight - 0.003909 * Value + 0.2016 * Distance \\
+- 0.000000001848 * Shipments:Weight - 0.0000000002035 * Shipments:Value \\ 
+- 0.0000002299 * Shipments:Distance + 0.0000000000001492 * Weight:Value \\
+- 0.00000000000236 * Weight:Distance  + 0.000000000008514 * Value:Distance \\
+- 736.4 * Mode(Rail):Shipments - 2.085 * Mode(Rail):Weight \\
++ 0.00554 * Mode(Rail):Value + 0.7333 * Mode(Rail):Distance 
+\end{multline*}
+
+**Interpretations for Submodel 2**. 
+
+1. X_Shipments: 
+
+\begin{multline*}
+Revenue = -664900 + Shipments*(27.47 - 0.000000001848Weight - 0.0000000002035Value \\
+- 0.0000002299Distance - 736.4Mode(Rail))
+\end{multline*}
+
+For every additional shipment, the revenue increases by the value (27.47 - 0.000000001848 * Weight-0.0000000002035 * Value-0.0000002299 * Distance-736.4 * Mode(Rail)) with a baseline effect of -664900. The effect of Shipments on revenue is generally positive, but the exact amount depends on the values of Weight, Value, Distance, and Mode(Rail).
+
+2. X_Weight: 
+
+\begin{multline*}
+Revenue = -664900 + Weight * (2.104 - 0.000000001848  * Shipments \\
++ 0.0000000000001492 * Value - 0.00000000000236 * Distance - 2.085 * Mode(Rail) )
+\end{multline*}
+
+For every additional Weight, the revenue increases by the value 2.104 - 0.000000001848 * Shipments+ 0.0000000000001492 * Value - 0.00000000000236 * Distance -2.085 * Mode(Rail) with a baseline effect of -664900. This equation shows how each additional Weight impacts the revenue, with the corresponding influence from Shipments, Value, Distance, and Mode(Rail).
+
+
+3. X_Distance : 
+
+\begin{multline*}
+Revenue = -664900 + Distance(0.2016 - 0.0000002299 * Shipments - 0.00000000000236 * Weight \\
++ 0.000000000008514 * Value + 0.7333 * Mode(Rail) )
+\end{multline*}
+
+For every additional Distance, the revenue increases by the value (0.2016 - 0.0000002299 * Shipments - 0.00000000000236 * Weight + 0.000000000008514 * Value + 0.7333 * Mode(Rail)) with a baseline effect of -664900. This equation shows how each additional Distance impacts the revenue, with the corresponding influence from Weight, Value, Shipments, and Mode(Rail).
+
+4. X_value:
+
+\begin{multline*}
+Revenue = -664900 + Value(- 0.003909 - 0.0000000002035 * Shipments + 0.0000000000001492 * Weight \\
++ 0.000000000008514 * Distance + 0.00554 * Mode(Rail))
+\end{multline*}
+
+For every additional Value, the revenue changes by the value -0.003909 - 0.0000000002035 * Shipments + 0.0000000000001492 * Weight + 0.000000000008514 * Distance + 0.00554 * Mode(Rail) with a base line effect of -664900. This equation shows how each additional Value impacts the revenue, with the corresponding influence from Weight, Distance, Shipments, and Mode(Rail).
+
+
+# Higher Order Model:
+
+We are utilizing the GGally library and the ggpairs function to assess the correlation between Revenue and the independent variables. Based on the results, we will decide whether or not to include higher-order terms in the model.
+
+
+![](ggpairs.png)
+```{r}
+#ggpairs(full_additive_model)
+```
+
+*Figure 11:* Correlation between the independent and the dependent variables
+
+We are creating these plots using ggplot to visually assess the relationship between Revenue and the independent variables (Shipments, Value, Weight, and Distance). The goal is to determine whether the relationships are linear. If the relationships appear nonlinear, we will consider including higher-order terms in the model to improve the accuracy of the model. The inclusion of higher-order terms will depend on the observed trends in these plots.
+
+```{r}
+ggplot(data=update_data,mapping= aes(x=Shipments,y=Revenue))+geom_point(color='green4')+ 
+  geom_smooth()
+
+ggplot(data=update_data,mapping= aes(x=Value,y=Revenue))+geom_point(color='green4')+ 
+  geom_smooth()
+
+ggplot(data=update_data,mapping= aes(x=Weight,y=Revenue))+geom_point(color='green4')+ 
+  geom_smooth()
+
+ggplot(data=update_data,mapping= aes(x=Distance,y=Revenue))+geom_point(color='green4')+ 
+  geom_smooth()
+```
+**Discussion**
+
+The results from the ggpairs function showed that all the independent numerical variables—Shipments, Value, Weight, and Distance—are correlated with the Revenue variable. This led us to further investigate the nature of these relationships. To gain a clearer understanding, we used ggplot graphs to visualize how each of these variables relates to Revenue. This helped us assess whether the relationships are linear or if we need to consider higher-order terms to better capture the patterns in the data.
+
+Based on the above graphs, we observed that the relationships between Revenue and both Value and Shipments exhibit slight non-linearity. This suggests that a simple linear model may not fully capture the underlying patterns. As a result, we will consider incorporating higher-order terms (such as squared or cubic terms) for these variables in the model. This will help to better account for the curvature and improve the model’s ability to fit the data more accurately.
+
+# Higher order model 1
+
+```{r}
+higher_order_model_1 = lm(Revenue~ factor(Mode) + factor(OrigRegion) + factor(DestRegion) + factor(TypeCommodity) + Shipments + Weight + Value + Distance + Shipments:Weight + Shipments:Value + Shipments:Distance + Weight:Value + Weight:Distance + Value:Distance + factor(Mode):Shipments + factor(Mode):Weight + factor(Mode):Value + factor(Mode):Distance + factor(OrigRegion):Shipments + factor(OrigRegion):Weight + factor(OrigRegion):Value + factor(OrigRegion):Distance + factor(DestRegion):Shipments + factor(DestRegion):Weight + factor(DestRegion):Value + factor(DestRegion):Distance + factor(TypeCommodity):Shipments + factor(TypeCommodity):Weight + factor(TypeCommodity):Value + factor(TypeCommodity):Distance +I(Value^2)  ,data = freight_data) 
+
+summary(higher_order_model_1)
+```
+
+**Discussion** 
+
+We see that after including the I(Value^2) term into our higher order model, the adjusted R square value increases to 0.9194 as compared to the 0.9188 of the interaction_model. Now we will be trying to include the I(Value^3) term into our higher order model.
+
+#Higher order model 2:
+
+```{r}
+higher_order_model_2 = lm(Revenue~ factor(Mode) + factor(OrigRegion) + factor(DestRegion) + factor(TypeCommodity) + Shipments + Weight + Value + Distance + Shipments:Weight + Shipments:Value + Shipments:Distance + Weight:Value + Weight:Distance + Value:Distance + factor(Mode):Shipments + factor(Mode):Weight + factor(Mode):Value + factor(Mode):Distance + factor(OrigRegion):Shipments + factor(OrigRegion):Weight + factor(OrigRegion):Value + factor(OrigRegion):Distance + factor(DestRegion):Shipments + factor(DestRegion):Weight + factor(DestRegion):Value + factor(DestRegion):Distance + factor(TypeCommodity):Shipments + factor(TypeCommodity):Weight + factor(TypeCommodity):Value + factor(TypeCommodity):Distance +I(Value^2) +I(Value^3)  ,data = freight_data) 
+summary(higher_order_model_2)
+```
+
+**Discussion**
+
+After including the I(value^3) term, it is still significant in the model. Simultaneously, the adjusted R squared value is also increasing. Therefore, it would be right to keep it in the model. Now, we will be trying for the I(Value^4) term.
+
+# Higher order model 3: 
+
+```{r}
+higher_order_model_3 = lm(Revenue~ factor(Mode) + factor(OrigRegion) + factor(DestRegion) + factor(TypeCommodity) + Shipments + Weight + Value + Distance + Shipments:Weight + Shipments:Value + Shipments:Distance + Weight:Value + Weight:Distance + Value:Distance + factor(Mode):Shipments + factor(Mode):Weight + factor(Mode):Value + factor(Mode):Distance + factor(OrigRegion):Shipments + factor(OrigRegion):Weight + factor(OrigRegion):Value + factor(OrigRegion):Distance + factor(DestRegion):Shipments + factor(DestRegion):Weight + factor(DestRegion):Value + factor(DestRegion):Distance + factor(TypeCommodity):Shipments + factor(TypeCommodity):Weight + factor(TypeCommodity):Value + factor(TypeCommodity):Distance +I(Value^2) +I(Value^3) +I(Value^4)  ,data = freight_data) 
+
+summary(higher_order_model_3)
+```
+**Discussion:** 
+
+After including I(value^4) into our model, there is not much significant increase in the adjusted R squared value and would lead to overfitting. Therefore we will not keep it in the higher order model. After this, we try to check if the inclusion of I(Shipments^2) has a significant increase in the adjusted R square or reduction in the RSE value. 
+
+
+```{r}
+higher_order_model_4 = lm(Revenue~ factor(Mode) + factor(OrigRegion) + factor(DestRegion) + factor(TypeCommodity) + Shipments + Weight + Value + Distance + Shipments:Weight + Shipments:Value + Shipments:Distance + Weight:Value + Weight:Distance + Value:Distance + factor(Mode):Shipments + factor(Mode):Weight + factor(Mode):Value + factor(Mode):Distance + factor(OrigRegion):Shipments + factor(OrigRegion):Weight + factor(OrigRegion):Value + factor(OrigRegion):Distance + factor(DestRegion):Shipments + factor(DestRegion):Weight + factor(DestRegion):Value + factor(DestRegion):Distance + factor(TypeCommodity):Shipments + factor(TypeCommodity):Weight + factor(TypeCommodity):Value + factor(TypeCommodity):Distance +I(Value^2) +I(Value^3) +I(Shipments^2)  ,data = freight_data) 
+summary(higher_order_model_4)
+```
+
+**Discussion**
+
+Since the adjusted R square does not increase, the inclusion of I(Shipments^2) term will only lead to overfitting. Therefore, we will not be keeping it in our model.
+
+
+# Final Higher Order Model. 
+
+```{r}
+higher_order_model_final = lm(Revenue~ factor(Mode) + factor(OrigRegion) + factor(DestRegion) + factor(TypeCommodity) + Shipments + Weight + Value + Distance + Shipments:Weight + Shipments:Value + Shipments:Distance + Weight:Value + Weight:Distance + Value:Distance + factor(Mode):Shipments + factor(Mode):Weight + factor(Mode):Value + factor(Mode):Distance + factor(OrigRegion):Shipments + factor(OrigRegion):Weight + factor(OrigRegion):Value + factor(OrigRegion):Distance + factor(DestRegion):Shipments + factor(DestRegion):Weight + factor(DestRegion):Value + factor(DestRegion):Distance + factor(TypeCommodity):Shipments + factor(TypeCommodity):Weight + factor(TypeCommodity):Value + factor(TypeCommodity):Distance +I(Value^2) +I(Value^3)  ,data = freight_data)
+
+summary(higher_order_model_final)
+```
+
+The Final higher model regression equation for predicting Revenue is:
+
+\begin{multline*}
+\text{Revenue} = 
+-1,908,000 + 1,977,000 \cdot \text{Mode(Rail)} + 1,462,000 \cdot \text{Mode(Truck)} \\
++ 1,020,000 \cdot \text{OrigRegion(Other Parts)} + 218,300 \cdot \text{OrigRegion(West Canada)} \\
+- 293,800 \cdot \text{DestRegion(Other Parts)} + 117,300 \cdot \text{DestRegion(West Canada)} \\
++ 566,500 \cdot \text{TypeCommodity(Manufacturing Misc Goods)} \\
+- 126,400 \cdot \text{TypeCommodity(Natural Resources Raw)} \\
+- 273.0 \cdot \text{Shipments} + 1.815 \cdot \text{Weight} - 0.00163 \cdot \text{Value} \\
++ 0.4584 \cdot \text{Distance} - 0.0000000000001589 \cdot \text{Value}^2 \\
++ 0.000000000000000000007633 \cdot \text{Value}^3 + 0.000000001900 \cdot \text{Shipments:Value} \\
+- 0.0000002724 \cdot \text{Shipments:Distance} + 0.000000000001727 \cdot \text{Weight:Value} \\
+- 0.000000000002858 \cdot \text{Weight:Distance} + 0.00000000001165 \cdot \text{Value:Distance} \\
+- 469.3 \cdot \text{Mode(Rail):Shipments} + 335.4 \cdot \text{Mode(Truck):Shipments} \\
+- 1.795 \cdot \text{Mode(Rail):Weight}- 1.804 \cdot \text{Mode(Truck):Weight} \\
++ 0.004899 \cdot \text{Mode(Rail):Value} + 0.003959 \cdot \text{Mode(Truck):Value} \\
++ 0.4966 \cdot \text{Mode(Rail):Distance} + 0.1979 \cdot \text{Mode(Truck):Distance} \\
++ 240.9 \cdot \text{OrigRegion(Other Parts):Shipments} \\
+- 159.6 \cdot \text{OrigRegion(West Canada):Shipments} \\
++ 0.01286 \cdot \text{OrigRegion(Other Parts):Weight} + 0.01455 \cdot \text{OrigRegion(West Canada):Weight} \\
++ 0.001145 \cdot \text{OrigRegion(Other Parts):Value} - 0.001274 \cdot \text{OrigRegion(West Canada):Value} \\
+- 0.1050 \cdot \text{OrigRegion(Other Parts):Distance} + 0.09952 \cdot \text{OrigRegion(West Canada):Distance} \\
++ 40.25 \cdot \text{DestRegion(Other Parts):Shipments} + 127.7 \cdot \text{DestRegion(West Canada):Shipments} \\
++ 0.01662 \cdot \text{DestRegion(Other Parts):Weight} - 0.006618 \cdot \text{DestRegion(West Canada):Weight} \\
++ 0.001862 \cdot \text{DestRegion(Other Parts):Value} + 0.0007873 \cdot \text{DestRegion(West Canada):Value} \\
++ 0.03344 \cdot \text{DestRegion(Other Parts):Distance} + 0.01878 \cdot \text{DestRegion(West Canada):Distance} \\
++ 21.00 \cdot \text{TypeCommodity(Manufacturing Misc Goods):Shipments} \\
+- 149.1 \cdot \text{TypeCommodity(Natural Resources Raw):Shipments} \\
++ 0.003068 \cdot \text{TypeCommodity(Manufacturing Misc Goods):Weight} \\ 
+- 0.001716 \cdot \text{TypeCommodity(Natural Resources Raw):Weight} \\
++ 0.002122 \cdot \text{TypeCommodity(Manufacturing Misc Goods):Value} \\
+- 0.0003350 \cdot \text{TypeCommodity(Natural Resources Raw):Value} \\
+- 0.4818 \cdot \text{TypeCommodity(Manufacturing Misc Goods):Distance}\\ 
++ 0.3061 \cdot \text{TypeCommodity(Natural Resources Raw):Distance} \\
+- 0.000000001678 \cdot \text{Shipments:Weight}. 
+\end{multline*}
+
+
+**Sub Models**. 
+
+*Submodel 1:* For the intercept term, Mode = Air, OrigRegion = East Canada, Dest Region = East Canada, TypeCommodity = Agri_and_food. 
+
+\begin{multline*}
+\text{Revenue} = 
+-1,908,000 - 273.0 \cdot \text{Shipments} + 1.815 \cdot \text{Weight} \\
+- 0.00163 \cdot \text{Value} + 0.4584 \cdot \text{Distance} \\
+- 0.0000000000001589 \cdot \text{Value}^2 + 0.000000000000000000007633 \cdot \text{Value}^3 \\
++ 0.000000001900 \cdot \text{Shipments:Value} - 0.0000002724 \cdot \text{Shipments:Distance} \\
++ 0.000000000001727 \cdot \text{Weight:Value} - 0.000000000002858 \cdot \text{Weight:Distance} \\
++ 0.00000000001165 \cdot \text{Value:Distance} 
+- 0.000000001678 \cdot \text{Shipments:Weight}
+\end{multline*}
+
+**Interpretation of submodel 1 of final higher order model**
+    
+1. X_Shipments:
+
+\begin{multline*}
+Revenue = -1,908,000 + Shipments(-273 + 0.000000001900*Value \\
+- 0.0000002724*Distance - 0.000000001678*Weight)
+\end{multline*}
+
+For every additional shipment, the revenue increases by the value (-273 + 0.000000001900Value - 0.0000002724Distance - 0.000000001678Weight)  with a baseline effect of -1,908,000. The effect of Shipments on revenue is generally positive, but the exact amount depends on the values of Weight, Value, Distance.
+
+2. X_Weight:
+ 
+\begin{multline*}
+Revenue = -1,908,000 + Weight(1.815 + 0.000000000001727 * Value \\
+- 0.000000000002858 * Distance - 0.000000001678 * Shipments )
+\end{multline*}
+
+For every additional Weight, the revenue increases by the value (1.815 + 0.000000000001727 * Value - 0.000000000002858 * Distance - 0.000000001678 * Shipments )  with a baseline effect of -1,908,000. This equation shows how each additional Weight impacts the revenue, with the corresponding influence from Shipments, Value, Distance.
+
+3. X_Distance:
+
+\begin{multline*}
+Revenue = -1,908,000 + Distance(0.4584 - 0.0000002724 * Shipments \\
+- 0.000000000002858 * Weight + 0.00000000001165 * Value)
+\end{multline*}
+
+For every additional Distance, the revenue increases by the value (0.4584 - 0.0000002724 * Shipments - 0.000000000002858 * Weight + 0.00000000001165 * Value)  with a baseline effect of -1,908,000. This equation shows how each additional Distance impacts the revenue, with the corresponding influence from Shipments, Value, Weight.
+
+4. X_Value
+
+\begin{multline*}
+Revenue = -1,908,000 + Value(-0.00163 - 0.0000000000001589*Value \\
++ 0.000000000000000000007633*Value^2 + 0.000000001900*Shipments \\
++ 0.000000000001727*Weight + 0.00000000001165*Distance)
+\end{multline*}
+
+For every additional Value, the revenue increases by the value (-0.00163 - 0.0000000000001589Value  + 0.000000000000000000007633Value^2 + 0.000000001900Shipments + 0.000000000001727Weight + 0.00000000001165Distance)  with a baseline effect of -1,908,000. This equation shows how each additional Value impacts the revenue, with the corresponding influence from Shipments, Distance, Weight.
+
+*Submodel 2:* For the intercept term, Mode = Rail, OrigRegion = East Canada, Dest Region = East Canada, TypeCommodity = Agri_and_food. 
+
+\begin{multline*}
+\text{Revenue} = 
+-1,908,000 + 1,977,000 \cdot \text{Mode(Rail)} - 273.0 \cdot \text{Shipments} \\
++ 1.815 \cdot \text{Weight} - 0.00163 \cdot \text{Value}  + 0.4584 \cdot \text{Distance} \\
+- 0.0000000000001589 \cdot \text{Value}^2 + 0.000000000000000000007633 \cdot \text{Value}^3 \\
++ 0.000000001900 \cdot \text{Shipments:Value} - 0.0000002724 \cdot \text{Shipments:Distance} \\
++ 0.000000000001727 \cdot \text{Weight:Value} - 0.000000000002858 \cdot \text{Weight:Distance} \\
++ 0.00000000001165 \cdot \text{Value:Distance} - 469.3 \cdot \text{Mode(Rail):Shipments} \\
+- 1.795 \cdot \text{Mode(Rail):Weight} + 0.004899 \cdot \text{Mode(Rail):Value} \\
++ 0.4966 \cdot \text{Mode(Rail):Distance} - 0.000000001678 \cdot \text{Shipments:Weight} \\
+\end{multline*}
+
+**Interpretation of submodel 2 of final higher order model**. 
+
+*Submodel 2:* For the intercept term, Mode = Rail, OrigRegion = East Canada, Dest Region = East Canada, TypeCommodity = Agri_and_food. 
+
+\begin{multline*}
+  \text{Revenue} = 
+  -1,908,000 + 1,977,000 \cdot \text{Mode(Rail)} - 273.0 \cdot \text{Shipments} \\
++ 1.815 \cdot \text{Weight} - 0.00163 \cdot \text{Value} + 0.4584 \cdot \text{Distance} \\
+- 0.0000000000001589 \cdot \text{Value}^2 + 0.000000000000000000007633 \cdot \text{Value}^3 \\
++ 0.000000001900 \cdot \text{Shipments:Value} - 0.0000002724 \cdot \text{Shipments:Distance} \\
++ 0.000000000001727 \cdot \text{Weight:Value} - 0.000000000002858 \cdot \text{Weight:Distance} \\
++ 0.00000000001165 \cdot \text{Value:Distance} - 469.3 \cdot \text{Mode(Rail):Shipments} \\
+- 1.795 \cdot \text{Mode(Rail):Weight} + 0.004899 \cdot \text{Mode(Rail):Value} \\
++ 0.4966 \cdot \text{Mode(Rail):Distance} - 0.000000001678 \cdot \text{Shipments:Weight}
+\end{multline*}
+
+
+1. X_Shipments:
+
+\begin{multline*}
+Revenue = -1,908,000 + Shipments(-273 + 0.000000001900*Value - 0.0000002724*Distance \\
+- 0.000000001678*Weight - 469.3*Mode(Rail))
+\end{multline*}
+
+For every additional shipment, the revenue increases by the value (-273 + 0.000000001900Value - 0.0000002724Distance - 0.000000001678Weight- 469.3Mode(Rail))  with a baseline effect of -1,908,000. The effect of Shipments on revenue is generally positive, but the exact amount depends on the values of Weight, Value, Distance & Mode(Rail).
+
+2. X_Weight:
+  
+\begin{multline*}
+Revenue = -1,908,000 + Weight(1.815 + 0.000000000001727 * Value - 0.000000000002858 * Distance \\
+- 0.000000001678 * Shipments -1.795 * Mode(Rail))
+\end{multline*}
+
+For every additional Weight, the revenue increases by the value (1.815 + 0.000000000001727 * Value - 0.000000000002858 * Distance - 0.000000001678 * Shipments -1.795Mode(Rail) ) with a baseline effect of -1,908,000. This equation shows how each additional Weight impacts the revenue, with the corresponding influence from Shipments, Value, Distance, Mode(Rail).
+
+3. X_Distance:
+  
+\begin{multline*}
+Revenue = -1,908,000 + Distance(0.4584 - 0.0000002724 * Shipments - 0.000000000002858 * Weight \\
++ 0.00000000001165 * Value +0.4966 * Mode(Rail))
+\end{multline*}
+
+For every additional Distance, the revenue increases by the value (0.4584 - 0.0000002724 * Shipments - 0.000000000002858 * Weight + 0.00000000001165 * Value +0.4966Mode(Rail)) with a baseline effect of -1,908,000. This equation shows how each additional Distance impacts the revenue, with the corresponding influence from Shipments, Value, Weight,Mode(Rail).
+
+4.X_Value
+
+\begin{multline*}
+Revenue = -1,908,000 + Value(-0.00163 - 0.0000000000001589*Value + 0.000000000000000000007633*Value^2 \\
++ 0.000000001900*Shipments + 0.000000000001727*Weight + 0.00000000001165*Distance + 0.004899*Mode(Rail))
+\end{multline*}
+
+For every additional Value, the revenue increases by the value (-0.00163 - 0.0000000000001589Value + + 0.000000000000000000007633Value^2 + 0.000000001900Shipments + 0.000000000001727Weight + 0.00000000001165Distance) 0.004899Mode(Rail)  with a baseline effect of -1,908,000. This equation shows how each additional Value impacts the revenue, with the corresponding influence from Shipments, Distance, Weight, Mode(Rail).
+
+# Assumptions of MLR:
+
+In multiple linear regression (MLR), there are several key assumptions that must be met for the model to provide reliable and valid results. These assumptions are:
+
+- Linearity Assumption: The relationship between the independent variables and the dependent variable should be linear. In other words, the effect of each predictor on the outcome variable is constant across all values of the predictors.
+
+- Independence: The observations should be independent of each other. This means that the residuals (errors) of the model are not correlated, ensuring that the model does not produce biased estimates due to dependency between observations.
+
+- Equal Variance (Homoscedasticity): The variance of the residuals should be constant across all levels of the independent variables. This assumption ensures that the model's predictions are equally precise for all values of the predictors.
+
+- Normality: The residuals (errors) of the model should follow a normal distribution. This is important for valid hypothesis testing, as many statistical tests in regression are based on the assumption of normality.
+
+- Multicollinearity: The independent variables should not be highly correlated with each other. High correlation between predictors can lead to unreliable estimates and difficulties in determining the individual effect of each predictor on the dependent variable.
+
+We will now check each of these assumptions one by one to ensure the validity of our model and its results.
+
+### Residual Plot
+
+```{r}
+par(mfrow=c(1,1))
+plot(higher_order_model_final, which=1)
+```
+### QQ Plot
+
+```{r}
+par(mfrow=c(1,1))
+plot(higher_order_model_final,which=2) #a Normal plot
+```
+
+### Scale-Location plot
+
+```{r}
+ggplot(higher_order_model_final, aes(x=.fitted, y=sqrt(abs(.stdresid)))) +
+  geom_point(colour = "purple") +
+  geom_hline(yintercept = 0) +
+  geom_smooth( colour = "green4")+
+   ggtitle("Scale-Location plot : Standardized Residual vs Fitted values")
+```
+
+
+
+### QQ plot after correcting Heteroscedascity
+
+```{r}
+higher_order_model_log <- lm(log(Revenue) ~ factor(Mode) + 
+                              factor(OrigRegion) + 
+                              factor(DestRegion) + 
+                              factor(TypeCommodity) + 
+                              Shipments + 
+                              Weight + 
+                              Value + 
+                              Distance + 
+                              Shipments:Weight + 
+                              Shipments:Value + 
+                              Shipments:Distance + 
+                              Weight:Value + 
+                              Weight:Distance + 
+                              Value:Distance + 
+                              factor(Mode):Shipments + 
+                              factor(Mode):Weight + 
+                              factor(Mode):Value + 
+                              factor(Mode):Distance + 
+                              factor(OrigRegion):Shipments + 
+                              factor(OrigRegion):Weight + 
+                              factor(OrigRegion):Value + 
+                              factor(OrigRegion):Distance + 
+                              factor(DestRegion):Shipments + 
+                              factor(DestRegion):Weight + 
+                              factor(DestRegion):Value + 
+                              factor(DestRegion):Distance + 
+                              factor(TypeCommodity):Shipments + 
+                              factor(TypeCommodity):Weight + 
+                              factor(TypeCommodity):Value + 
+                              factor(TypeCommodity):Distance + 
+                              I(Value^2) + 
+                              I(Value^3),
+                            data = freight_data)
+
+par(mfrow=c(1,1))
+plot(higher_order_model_log, which=2)
+```
+
+1. **Linearity Assumption**
+
+In the residual vs. fitted plot, deviations from randomness or patterns in residuals suggest non-linearity. For the higher order final model , the residuals show heteroscedasticity (funnel shape) and potential non-linearity. After log transformation of the dependent variable, the residuals display better adherence to linearity as variability across the fitted values is reduced. \
+
+Conclusion: The log transformation improves linearity. \
+
+2) **Independence Assumption:** In our data, the variables were not related to time, space, or group, so we can be pretty sure that their measurements are independent. \
+
+3) **Equal Variance Assumption:** In the residual plot: \
+- For low fitted values, the variance seems small. \
+- For medium fitted values, variance appears consistent. \
+- For high fitted values, variance slightly increases.
+This indicates heteroscedasticity, where the variance grows with larger fitted values.
+
+After applying a log transformation to the response variable, the residual spread appears more uniform, reducing heteroscedasticity.
+
+Conclusion: The log transformation reduces heteroscedasticity, improving model validity.
+
+4) **Normality Assumption:** The normality assumption requires that residuals follow a normal distribution. \
+
+The Q-Q plot for the higher order final model, shows heavy deviations at both tails, indicating non-normality. \
+
+After applying the log transformation, the Q-Q plot improves significantly, with residuals closely following the diagonal line except for a few outliers at the extremes. \
+
+Conclusion: Normality is better achieved with the log-transformed model. \
+
+5) **Multicollinearity:** We can check this by using VIF.VIF is used to assess multicollinearity, which occurs when predictor variables in a regression model are highly correlated. \
+
+No severe multicollinearity issues are detected in the model. \
+The highest normalized VIF value, 3.25 for Shipments, suggests a slight relationship with other predictors, but it is not concerning. \
+We can proceed with these variables as they don't have multicollinearity. \
+
+6) **Outliers:** The Residuals vs. Leverage plots highlight influential observations in the regression model, particularly before and after applying a log transformation to the Revenue variable. In the first plot, standardized residuals range from -60 to 60, indicating extreme outliers and potential heteroscedasticity. Several points exceed Cook’s distance thresholds, suggesting high influence, with high-leverage observations that could significantly impact the model’s coefficients. \
+
+The second plot, using log-transformed Revenue, shows a notable reduction in residual variability, with standardized residuals ranging from -10 to 15, indicating improved model fit and reduced heteroscedasticity. Although the transformation addresses variance issues, a few high-leverage points remain, though their influence appears less severe. \
+
+Despite the improvements, some observations, such as those near Cook’s distance contours, remain influential. Overall, the log transformation enhances model assumptions. \
+
+```{r}
+plot(higher_order_model_final, which=5) 
+```
+
+```{r}
+plot(higher_order_model_log, which=5) 
+```
+
+### Predicting Revenue values. 
+
+
+```{r}
+head(freight_data)
+
+new_data <- data.frame(
+  Mode = 'Truck',
+  Shipments = 1171.7,
+  Weight = 3758960.8,
+  Distance =5473343.4,
+  Value=14567408.4,
+  OrigRegion='East Canada',
+  DestRegion='West Canada',
+  TypeCommodity='Manafacturing_Misc_Goods'
+)
+
+# Predict Revenue with confidence interval
+predicted_values <- predict(higher_order_model_final, 
+                            newdata = new_data, interval = "confidence", level = 0.95)
+
+predicted_values
+```
+**Interpretation**
+
+- The predicted revenue for the given shipment, based on the model, is estimated to be $1,652,943. \
+
+- With a 95% confidence interval, we can be 95% confident that the true revenue will fall between $1,489,956 and $1,815,931 for similar shipments under the same conditions.
+
+**Results**
+
+1. After conducting all analyses, we derived the final regression equation that best explains the relationship between the predictors and revenue. Through iterative improvements, we enhanced the model's performance significantly. The adjusted R-squared value improved from 80.17% to 92.21%, indicating a stronger fit of the model to the data. Additionally, the Residual Standard Error (RSE) decreased from 13,920,000 to 8,729,000, reflecting a substantial reduction in prediction error. These improvements demonstrate that the final model provides a more accurate and reliable representation of the factors influencing revenue.  \
+
+2. In the exploratory phase, we uncovered critical insights into revenue distribution and its relationship with key factors. One standout finding was that the truck mode generates the highest revenue for the carrier, outperforming other modes of transportation. This was followed by rail and then air, indicating the pivotal role of trucks in revenue generation all over canada. These insights can help prioritize transportation strategies and resource allocation to new business owners. \
+
+3. The analysis revealed significant regional differences in revenue generation. Shipments originating and terminating within Western Canada were observed to generate the most revenue compared to other regions. This could be attributed to higher shipping volumes, regional economic activity, or shorter distances translating to more frequent shipments. \
+
+4. The stepwise regression analysis highlighted the most significant predictors affecting revenue. These include: \
+
+Weight: Larger shipment weights correlate with higher revenue. \
+Distance: Longer distances drive revenue, though the effect may taper off at very high values. \
+Value: Higher shipment value positively influences revenue. \
+
+
+5. Upon validating the final model, it was found to violate several key assumptions of Multiple Linear Regression (MLR), including: \
+
+Non-linearity between predictors and the response variable. \
+Non-constant variance of residuals (heteroscedasticity). \
+Non-normality of residuals. \
+
+To address these violations, a log transformation was applied to the response variable. This transformation improved the assumption violations. \
+
+**Conclusion & Discussion**
+
+The Final higher model regression equation for predicting Revenue is:
+
+\begin{multline*}
+\text{Revenue} = 
+-1,908,000 + 1,977,000 \cdot \text{Mode(Rail)} + 1,462,000 \cdot \text{Mode(Truck)} \\
++ 1,020,000 \cdot \text{OrigRegion(Other Parts)} + 218,300 \cdot \text{OrigRegion(West Canada)} \\
+- 293,800 \cdot \text{DestRegion(Other Parts)} + 117,300 \cdot \text{DestRegion(West Canada)} \\
++ 566,500 \cdot \text{TypeCommodity(Manufacturing Misc Goods)} \\
+- 126,400 \cdot \text{TypeCommodity(Natural Resources Raw)} \\
+- 273.0 \cdot \text{Shipments} + 1.815 \cdot \text{Weight} - 0.00163 \cdot \text{Value} \\
++ 0.4584 \cdot \text{Distance} - 0.0000000000001589 \cdot \text{Value}^2 \\
++ 0.000000000000000000007633 \cdot \text{Value}^3 + 0.000000001900 \cdot \text{Shipments:Value} \\
+- 0.0000002724 \cdot \text{Shipments:Distance} + 0.000000000001727 \cdot \text{Weight:Value} \\
+- 0.000000000002858 \cdot \text{Weight:Distance} + 0.00000000001165 \cdot \text{Value:Distance} \\
+- 469.3 \cdot \text{Mode(Rail):Shipments} + 335.4 \cdot \text{Mode(Truck):Shipments} \\
+- 1.795 \cdot \text{Mode(Rail):Weight}- 1.804 \cdot \text{Mode(Truck):Weight} \\
++ 0.004899 \cdot \text{Mode(Rail):Value} + 0.003959 \cdot \text{Mode(Truck):Value} \\
++ 0.4966 \cdot \text{Mode(Rail):Distance} + 0.1979 \cdot \text{Mode(Truck):Distance} \\
++ 240.9 \cdot \text{OrigRegion(Other Parts):Shipments} \\
+- 159.6 \cdot \text{OrigRegion(West Canada):Shipments} \\
++ 0.01286 \cdot \text{OrigRegion(Other Parts):Weight} \\
++ 0.01455 \cdot \text{OrigRegion(West Canada):Weight} \\
++ 0.001145 \cdot \text{OrigRegion(Other Parts):Value} \\
+- 0.001274 \cdot \text{OrigRegion(West Canada):Value} \\
+- 0.1050 \cdot \text{OrigRegion(Other Parts):Distance} \\
++ 0.09952 \cdot \text{OrigRegion(West Canada):Distance} \\
++ 40.25 \cdot \text{DestRegion(Other Parts):Shipments} \\
++ 127.7 \cdot \text{DestRegion(West Canada):Shipments} \\
++ 0.01662 \cdot \text{DestRegion(Other Parts):Weight} \\
+- 0.006618 \cdot \text{DestRegion(West Canada):Weight} \\
++ 0.001862 \cdot \text{DestRegion(Other Parts):Value} \\
++ 0.0007873 \cdot \text{DestRegion(West Canada):Value} \\
++ 0.03344 \cdot \text{DestRegion(Other Parts):Distance} \\
++ 0.01878 \cdot \text{DestRegion(West Canada):Distance} \\
++ 21.00 \cdot \text{TypeCommodity(Manufacturing Misc Goods):Shipments} \\
+- 149.1 \cdot \text{TypeCommodity(Natural Resources Raw):Shipments} \\
++ 0.003068 \cdot \text{TypeCommodity(Manufacturing Misc Goods):Weight} \\ 
+- 0.001716 \cdot \text{TypeCommodity(Natural Resources Raw):Weight} \\
++ 0.002122 \cdot \text{TypeCommodity(Manufacturing Misc Goods):Value} \\
+- 0.0003350 \cdot \text{TypeCommodity(Natural Resources Raw):Value} \\
+- 0.4818 \cdot \text{TypeCommodity(Manufacturing Misc Goods):Distance} \\ 
++ 0.3061 \cdot \text{TypeCommodity(Natural Resources Raw):Distance} \\
+- 0.000000001678 \cdot \text{Shipments:Weight}. \\
+\end{multline*}
+
+The primary goal of this analysis was to develop an effective model for predicting freight revenue. After conducting exploratory data analysis (EDA), we built a multiple linear regression (MLR) model. The process involved starting with a first-order model and progressively adding interaction and higher-order terms to improve accuracy. We also used stepwise regression to identify significant predictors.
+
+During EDA, we checked for multicollinearity using Variance Inflation Factor (VIF) and applied log transformations to the response variable and predictors to address heteroscedasticity and outliers. This ensured the model met the assumptions of linearity, homoscedasticity, and normality of residuals.
+
+The final model, selected through an iterative process, showed a significant improvement in fit, with the adjusted R-squared increasing from 80.17% to 92.21% and the Residual Standard Error (RSE) decreasing from 13,920,000 to 8,729,000.The model successfully predicts revenue based on these factors. Future improvements could include exploring non-linear models or machine learning techniques, and incorporating additional data like economic indicators to refine predictions.
+
+In conclusion, the final multiple linear regression model is highly effective in explaining and predicting freight revenue. By addressing key assumptions and carefully selecting relevant predictors, we developed a model that offers valuable insights for strategic decision-making and optimization of freight operations.
+
+
+# References. 
+
+[1] J. Yousefi, S. Ashtab, A. Yasaei, A. George, A. Mukarram, and S. S. Sandhu, "Multiple Linear Regression Analysis of Canada’s Freight Transportation Framework," Shannon School of Business, Cape Breton University, Sydney, NS B1P 6L2, Canada, 2024 \
+[2].DataCamp, "Multiple Linear Regression in R: A Tutorial," DataCamp, 2024. [Online]. Available: https://www.datacamp.com/tutorial/multiple-linear-regression-r-tutorial. [Accessed: 30-Nov-2024]. \
+[3]. RDocumentation, "GGally package version 2.2.1," RDocumentation, 2024. [Online]. Available: https://www.rdocumentation.org/packages/GGally/versions/2.2.1. [Accessed: 30-Nov-2024]. \
+[4].Statistics Solutions, "Assumptions of Multiple Linear Regression," Statistics Solutions, 2024. [Online]. Available: https://www.statisticssolutions.com/free-resources/directory-of-statistical-analyses/assumptions-of-multiple-linear-regression/. [Accessed: 30-Nov-2024]. \
+[5]. H. Wickham and G. Grolemund, "Exploratory Data Analysis," in R for Data Science, 2nd ed. 2024. [Online]. Available: https://r4ds.had.co.nz/exploratory-data-analysis.html. [Accessed: 01-Dec-2024] \
+[6]. GeeksforGeeks, "Hypothesis Testing in R Programming," GeeksforGeeks, 2024. [Online]. Available: https://www.geeksforgeeks.org/hypothesis-testing-in-r-programming/. [Accessed: 01-Dec-2024]. \
+[7]. R-bloggers, "Introducing olsrr," R-bloggers, 2019. [Online]. Available: https://www.r-bloggers.com/2019/02/introducing-olsrr/. [Accessed: 01-Dec-2024]. \
